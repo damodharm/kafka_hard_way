@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group 'com.github.damodharm'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.4.0'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.0-alpha1'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter', version: '2.2.2.RELEASE'
+    compile group: 'org.projectlombok', name: 'lombok-maven', version: '1.18.10.0', ext: 'pom'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
