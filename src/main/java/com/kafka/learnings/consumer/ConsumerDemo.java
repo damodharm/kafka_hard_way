@@ -9,6 +9,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -18,42 +20,46 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
-
 @Component
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConsumerDemo {
 
-    @Value("${kafka.consumer.group-name}")
-    private String consumerGroup;
     @Value("${kafka.bootstrapUrl}")
     private String brokerUrl;
+    @Value("${kafka.consumer.group-name}")
+    private String consumerGroup;
+    @Value("${kafka.consumer.offset-config}")
+    private String offsetConfig;
     @Value("${kafka.topic-name}")
     private String topicName;
     private Logger logger = LoggerFactory.getLogger(ConsumerDemo.class);
 
-    // create consumer config
-    @Bean
+    @Autowired
+    @Qualifier("consumerProperties")
+    Properties properties;
+
+    @Autowired
+    KafkaConsumer<String, String> consumer;
+
+    @Bean(name = "consumerProperties")
     private Properties properties() {
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig);
         return properties;
     }
 
-    // create consumer
     @Bean
     private KafkaConsumer<String, String> createConsumer() {
-        return new KafkaConsumer<>(properties());
+        return new KafkaConsumer<>(properties);
     }
 
-    // subscribe consumer to topic(s)
     @PostConstruct
     public void subscribeToTopic() {
-        KafkaConsumer<String, String> consumer = createConsumer();
         consumer.subscribe(Collections.singletonList(topicName));
 
         while(true) {
@@ -61,7 +67,6 @@ public class ConsumerDemo {
         for (ConsumerRecord<String, String> record: records) {
             logger.info(String.format("Topic : %s - Key : %s - Value : %s - Topic : %s - Partition : %s", record.topic(), record.key(), record.value(), record.topic(), record.partition()));
         }
-        consumer.commitAsync();
         }
     }
 

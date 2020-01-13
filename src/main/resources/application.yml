@@ -5,6 +5,8 @@ kafka:
   topic-name: input-topic
   consumer:
     group-name: input-topic-group
+    offset-config: earliest
+    offset-to-read-from: 15L
 
 jaeger.tracer:
   host: localhost
