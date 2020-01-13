@@ -1,4 +1,4 @@
-package com.github.damodharm.kafkaPractice;
+package com.kafka.learnings;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

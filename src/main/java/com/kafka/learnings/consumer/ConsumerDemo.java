@@ -1,5 +1,7 @@
-package com.github.damodharm.kafkaPractice;
+package com.kafka.learnings.consumer;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -16,41 +18,44 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
+
 @Component
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConsumerDemo {
 
     @Value("${kafka.consumer.group-name}")
-    private String CONSUMER_GROUP_NAME;
+    private String consumerGroup;
     @Value("${kafka.bootstrapUrl}")
-    private String BROKER_URL;
+    private String brokerUrl;
     @Value("${kafka.topic-name}")
-    private String TOPIC_NAME;
-    Logger logger = LoggerFactory.getLogger(ConsumerDemo.class);
+    private String topicName;
+    private Logger logger = LoggerFactory.getLogger(ConsumerDemo.class);
 
-    // create properties
+    // create consumer config
     @Bean
-    public Properties properties() {
+    private Properties properties() {
         Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
         properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "input-topic-group");
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         return properties;
     }
 
     // create consumer
     @Bean
-    public KafkaConsumer<String, String> createConsumer() {
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(properties());
-        consumer.subscribe(Collections.singletonList(TOPIC_NAME));
-        return  consumer;
+    private KafkaConsumer<String, String> createConsumer() {
+        return new KafkaConsumer<>(properties());
     }
 
-    // subscribe to topic
+    // subscribe consumer to topic(s)
     @PostConstruct
     public void subscribeToTopic() {
         KafkaConsumer<String, String> consumer = createConsumer();
+        consumer.subscribe(Collections.singletonList(topicName));
+
         while(true) {
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
         for (ConsumerRecord<String, String> record: records) {
