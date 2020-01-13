@@ -1,5 +1,11 @@
+spring:
+  application.name: consumerDemo
 kafka:
   bootstrapUrl: localhost:9092
   topic-name: input-topic
   consumer:
     group-name: input-topic-group
+
+jaeger.tracer:
+  host: localhost
+  port: 6831
