@@ -13,10 +13,10 @@ import java.util.Properties;
 @Configuration
 public class ConsumerConfig {
 
-    @Value("${kafka.bootstrapUrl}")
-    private String brokerUrl;
-    @Value("${kafka.consumer.group-name}")
-    private String consumerGroup;
+    @Value("${kafka.bootstrap-servers}")
+    private String bootstrapServers;
+    @Value("${kafka.consumer.group-id}")
+    private String groupId;
     @Value("${kafka.consumer.offset-config}")
     private String offsetConfig;
 
@@ -27,10 +27,10 @@ public class ConsumerConfig {
     @Bean(name = "consumerProperties")
     public Properties properties() {
         Properties properties = new Properties();
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
+        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
+        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig);
         return properties;
     }
