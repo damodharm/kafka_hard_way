@@ -1,9 +1,12 @@
 .DS_Store
 .gradle
 .idea
-build
-gradle
-gradlew
-gradlew.bat
-settings.gradle
-gradlew.bat
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+/out/
