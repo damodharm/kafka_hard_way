@@ -25,47 +25,22 @@ import java.util.Properties;
 @AllArgsConstructor
 public class ConsumerDemo {
 
-    @Value("${kafka.bootstrapUrl}")
-    private String brokerUrl;
-    @Value("${kafka.consumer.group-name}")
-    private String consumerGroup;
-    @Value("${kafka.consumer.offset-config}")
-    private String offsetConfig;
+
     @Value("${kafka.topic-name}")
     private String topicName;
     private Logger logger = LoggerFactory.getLogger(ConsumerDemo.class);
 
     @Autowired
-    @Qualifier("consumerProperties")
-    Properties properties;
-
-    @Autowired
     KafkaConsumer<String, String> consumer;
 
-    @Bean(name = "consumerProperties")
-    private Properties properties() {
-        Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
-        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig);
-        return properties;
-    }
-
-    @Bean
-    private KafkaConsumer<String, String> createConsumer() {
-        return new KafkaConsumer<>(properties);
-    }
-
     @PostConstruct
-    public void subscribeToTopic() {
+    public void subscribeToTopicAndPollData() {
         consumer.subscribe(Collections.singletonList(topicName));
 
         while(true) {
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
         for (ConsumerRecord<String, String> record: records) {
-            logger.info(String.format("Topic : %s - Key : %s - Value : %s - Topic : %s - Partition : %s", record.topic(), record.key(), record.value(), record.topic(), record.partition()));
+            logger.info(String.format("Topic : %s - Key : %s - Value : %s - Partition : %s", record.topic(), record.key(), record.value(), record.partition()));
         }
         }
     }
