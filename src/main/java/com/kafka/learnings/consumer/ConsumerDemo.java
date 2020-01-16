@@ -12,6 +12,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Collections;
 
 @Component
@@ -38,7 +39,7 @@ public class ConsumerDemo {
         boolean forever = true;
         while (forever) {
 
-            ConsumerRecords<String, String> records = tracingKafkaConsumer.poll(100L);
+            ConsumerRecords<String, String> records = tracingKafkaConsumer.poll(Duration.ofMillis(100));
 
             for (ConsumerRecord<String, String> record : records) {
                 logger.info(String.format("Topic : %s - Key : %s - Value : %s - Partition : %s", record.topic(), record.key(), record.value(), record.partition()));
@@ -46,3 +47,6 @@ public class ConsumerDemo {
         }
     }
 }
+
+
+

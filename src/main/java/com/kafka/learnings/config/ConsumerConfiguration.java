@@ -47,7 +47,6 @@ public class ConsumerConfiguration {
         return properties;
     }
 
-
     @Bean
     public KafkaConsumer<String, String> createConsumer() {
         return new KafkaConsumer<>(properties);
