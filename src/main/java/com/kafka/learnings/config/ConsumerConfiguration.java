@@ -1,5 +1,8 @@
 package com.kafka.learnings.config;
 
+import io.opentracing.Tracer;
+import io.opentracing.contrib.kafka.TracingKafkaConsumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 @Configuration
-public class ConsumerConfig {
+public class ConsumerConfiguration {
 
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -20,23 +23,38 @@ public class ConsumerConfig {
     @Value("${kafka.consumer.offset-config}")
     private String offsetConfig;
 
+    private final Tracer tracer;
+
     @Autowired
     @Qualifier("consumerProperties")
-    Properties properties;
+    private Properties properties;
+
+    @Autowired
+    private KafkaConsumer<String, String> consumer;
+
+    public ConsumerConfiguration(Tracer tracer) {
+        this.tracer = tracer;
+    }
 
     @Bean(name = "consumerProperties")
     public Properties properties() {
         Properties properties = new Properties();
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.setProperty(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig);
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offsetConfig);
         return properties;
     }
+
 
     @Bean
     public KafkaConsumer<String, String> createConsumer() {
         return new KafkaConsumer<>(properties);
+    }
+
+    @Bean
+    public TracingKafkaConsumer<String, String> tracingKafkaConsumer() {
+        return new TracingKafkaConsumer<>(consumer, tracer);
     }
 }
